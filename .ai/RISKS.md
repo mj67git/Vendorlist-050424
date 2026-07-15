@@ -17,3 +17,11 @@
 - **Impact**: Medium
 - **Description**: Standard authentication token stored in localStorage could be vulnerable to XSS.
 - **Mitigation**: Implement httpOnly cookies for session storage and configure strict CORS policies on the Express application.
+
+---
+
+## Related Documents
+- `/.ai/TEST_PLAN.md` (Security tests)
+- `/.ai/DATABASE.md` (PostgreSQL and transaction rules)
+- `/.ai/KNOWN_ISSUES.md` (Technical debt)
+

@@ -33,3 +33,11 @@
 
 ### Unauthorized Modals
 - **Objective**: Ensure standard "Evaluators" are strictly blocked from deleting vendors or viewing raw administrative audit logs.
+
+---
+
+## Related Documents
+- `/.ai/RISKS.md` (Security risks)
+- `/.ai/CODE_STYLE.md` (Engineering standards)
+- `/.ai/WORKFLOW.md` (Testing process requirements)
+
