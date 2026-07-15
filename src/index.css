@@ -1,0 +1,100 @@
+@import "tailwindcss";
+@import "vazirmatn/misc/Farsi-Digits/Vazirmatn-FD-font-face.css";
+
+@theme {
+  --font-sans: "Vazirmatn FD", system-ui, sans-serif;
+  --font-mono: "Vazirmatn FD", ui-monospace, Courier, monospace;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-feature-settings: "ss02";
+  background-color: #f1f5f9;
+  color: #475569;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer base {
+  button, a, tr, .card, [role="button"], input, select, textarea {
+    @apply transition-all duration-200 ease-in-out;
+  }
+}
+
+@layer utilities {
+  .page-enter {
+    animation: pageEnter 0.3s ease forwards;
+  }
+  .vendor-row {
+    animation: vendorRow 0.25s ease both;
+  }
+  .toast-in {
+    animation: toastIn 0.25s ease forwards;
+  }
+  .fade-in {
+    animation: pageEnter 0.4s ease forwards;
+  }
+  .fade-in-fast {
+    animation: pageEnter 0.2s ease forwards;
+  }
+  .slide-in {
+    animation: pageEnter 0.35s ease forwards;
+  }
+  .bounce-in {
+    animation: pageEnter 0.45s ease forwards;
+  }
+  /* Scrollbar override */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(15,23,42,0.15);
+    border-radius: 999px;
+  }
+}
+
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes vendorRow {
+  from { opacity: 0; transform: translateX(-6px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* Range slider thumb */
+input[type=range] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(15,23,42,0.1);
+  border-radius: 999px;
+  height: 4px;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #f1f5f9;
+  box-shadow: 0 1px 4px rgba(15,23,42,0.2);
+  background: currentColor;
+}
+input[type=range]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #f1f5f9;
+  box-shadow: 0 1px 4px rgba(15,23,42,0.2);
+  background: currentColor;
+}
+
