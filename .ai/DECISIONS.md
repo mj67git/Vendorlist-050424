@@ -21,3 +21,16 @@
 - **Decision**: Option 2 (Tailwind CSS).
 - **Reason**: Tailwind allows perfect, lightweight design control, supports native RTL layouts, and completely avoids bloated JavaScript bundles or inline style injection.
 - **Trade-offs**: Requires writing custom classes on multiple markup elements.
+- **Trade-offs**: Requires writing custom classes on multiple markup elements.
+
+---
+
+## ADR-003: Deterministic Data Anonymization & Git Exclusions
+- **Problem**: Proprietary pharmaceutical supplier records and Iran Regulatory Codes (IRC) were committed to the workspace as seed files, creating an enterprise exposure risk.
+- **Options considered**:
+  1. Manual scrub of JSON records.
+  2. Maintain separate private database repository.
+  3. Implement deterministic, seeded pseudo-random anonymizer script (`anonymize.cjs`) and add database assets to `.gitignore`.
+- **Decision**: Option 3.
+- **Reason**: Writing a custom generator utilizing a seeded hash of original inputs guarantees that all synthetic assets conform to the exact structural format of real data, preserves logical relationships (e.g., matching vendors, CAS coordinates, and materials still correspond perfectly), while purging 100% of sensitive information. Disallowing tracking of database JSON/SQL assets ensures no future developer accidentally pushes real-world client info.
+- **Trade-offs**: Developers must manually run the seed generators or copy baseline templates during initial local workspace configuration.
