@@ -4,7 +4,7 @@ import { Material, MaterialForm } from './MaterialForm';
 import { MaterialDetailView } from './MaterialDetailView';
 import { MaterialRoleBadge } from './MaterialRoleBadge';
 import { 
-  Plus, Search, Edit2, Trash2, Layers, Filter, Eye, ArrowUpDown, 
+  Plus, Search, Edit2, Database, Trash2, Layers, Filter, Eye, ArrowUpDown, 
   ChevronRight, ChevronLeft, Calendar, FileText, Globe, Check, AlertCircle 
 } from 'lucide-react';
 
@@ -219,62 +219,87 @@ export const MaterialMasterView: React.FC<MaterialMasterViewProps> = ({
           </div>
 
           {/* Search and Filters panel */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs text-right">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-              {/* Search input */}
-              <div className="md:col-span-8 relative">
-                <input
-                  type="text"
-                  placeholder="جستجو در نام، نام لاتین، CAS، محصول..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-4 pr-10 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none text-xs transition-all text-right"
-                />
-                <Search className="w-4 h-4 text-slate-400 absolute right-3.5 top-3.5" />
-              </div>
+          {materials.length > 0 && (
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs text-right">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                {/* Search input */}
+                <div className="md:col-span-8 relative">
+                  <input
+                    type="text"
+                    placeholder="جستجو در نام، نام لاتین، CAS، محصول..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-4 pr-10 py-2.5 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none text-xs transition-all text-right"
+                  />
+                  <Search className="w-4 h-4 text-slate-400 absolute right-3.5 top-3.5" />
+                </div>
 
-              {/* Role filter */}
-              <div className="md:col-span-4 flex items-center gap-2 justify-end">
-                <select
-                  value={roleFilter}
-                  onChange={(e) => setRoleFilter(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-600 outline-none focus:border-indigo-500 text-right font-medium"
-                >
-                  <option value="all">همه نقش‌های پایه</option>
-                  <option value="API">ماده مؤثره (API)</option>
-                  <option value="INT">حدواسط (INT)</option>
-                  <option value="REA">واکنشگر (REA)</option>
-                  <option value="SOL">حلال (SOL)</option>
-                  <option value="Excipient">ماده کمکی (Excipient)</option>
-                </select>
-                <Filter className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                {/* Role filter */}
+                <div className="md:col-span-4 flex items-center gap-2 justify-end">
+                  <select
+                    value={roleFilter}
+                    onChange={(e) => setRoleFilter(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-600 outline-none focus:border-indigo-500 text-right font-medium"
+                  >
+                    <option value="all">همه نقش‌های پایه</option>
+                    <option value="API">ماده مؤثره (API)</option>
+                    <option value="INT">حدواسط (INT)</option>
+                    <option value="REA">واکنشگر (REA)</option>
+                    <option value="SOL">حلال (SOL)</option>
+                    <option value="Excipient">ماده کمکی (Excipient)</option>
+                  </select>
+                  <Filter className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Records Table */}
-          <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs text-right">
+          {/* Records Table or Empty State */}
+          {materials.length === 0 ? (
+            <div className="bg-white border border-slate-200 rounded-2xl p-16 flex flex-col items-center justify-center text-center shadow-xs">
+              <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center border border-slate-100 mb-6 shadow-sm">
+                <Database className="w-8 h-8 text-slate-400" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 mb-2">بانک مواد اولیه خالی است</h3>
+              <p className="text-sm text-slate-500 font-medium mb-8 max-w-md">
+                هنوز هیچ ماده اولیه‌ای ثبت نشده است. برای شروع فرآیند ارزیابی تأمین‌کنندگان، ابتدا باید مواد اولیه پایه را در سیستم تعریف کنید.
+              </p>
+              {currentUserRole !== 'finance' && (
+                <button
+                  onClick={() => {
+                    setEditingMaterial(null);
+                    setSubView('form');
+                  }}
+                  className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all font-bold text-sm shadow-md hover:shadow-lg cursor-pointer"
+                >
+                  <Plus className="w-5 h-5" />
+                  <span>ثبت اولین ماده اولیه</span>
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs text-right">
             <div className="overflow-x-auto">
-              <table className="w-full text-xs">
+              <table className="w-full text-xs table-fixed">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 font-bold">
                     <th className="py-4 px-4 text-center w-36">عملیات کنترلی</th>
-                    <th className="py-4 px-4 text-right cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => triggerSort('role')}>
-                      <div className="flex items-center gap-1.5 justify-end">
-                        <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
+                    <th className="py-4 px-4 text-right cursor-pointer hover:bg-slate-100 transition-colors w-32" onClick={() => triggerSort('role')}>
+                      <div className="flex items-center gap-1.5 justify-start">
                         <span>نقش ماده</span>
+                        <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
                       </div>
                     </th>
-                    <th className="py-4 px-4 text-right cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => triggerSort('cas')}>
-                      <div className="flex items-center gap-1.5 justify-end">
-                        <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
+                    <th className="py-4 px-4 text-right cursor-pointer hover:bg-slate-100 transition-colors w-44" onClick={() => triggerSort('cas')}>
+                      <div className="flex items-center gap-1.5 justify-start">
                         <span>CAS Number</span>
+                        <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
                       </div>
                     </th>
                     <th className="py-4 px-4 text-right cursor-pointer hover:bg-slate-100 transition-colors" onClick={() => triggerSort('name')}>
-                      <div className="flex items-center gap-1.5 justify-end">
-                        <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
+                      <div className="flex items-center gap-1.5 justify-start">
                         <span>عنوان استاندارد رگولاتوری</span>
+                        <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
                       </div>
                     </th>
                   </tr>
@@ -293,7 +318,7 @@ export const MaterialMasterView: React.FC<MaterialMasterViewProps> = ({
                       return (
                         <tr key={m.id} className="hover:bg-slate-50/50 transition-colors">
                           {/* Actions */}
-                          <td className="py-3 px-4 text-center">
+                          <td className="py-3 px-4 text-center w-36">
                             <div className="flex items-center justify-center gap-2">
                               <button
                                 onClick={() => {
@@ -331,25 +356,25 @@ export const MaterialMasterView: React.FC<MaterialMasterViewProps> = ({
                           </td>
 
                           {/* Role */}
-                          <td className="py-3 px-4 text-right">
+                          <td className="py-3 px-4 text-right w-32">
                             <MaterialRoleBadge role={m.role} />
                           </td>
 
                           {/* CAS */}
-                          <td className="py-3 px-4 text-right font-mono text-slate-600">
+                          <td className="py-3 px-4 text-right font-mono text-slate-600 w-44">
                             {m.cas && m.cas !== 'N/A' ? m.cas : <span className="text-slate-300">N/A</span>}
                           </td>
 
                           {/* Titles */}
                           <td className="py-3 px-4 text-right">
                             <div className="space-y-1">
-                              <h4 className="font-bold text-slate-800 text-xs flex items-center justify-end gap-1.5">
+                              <h4 className="font-bold text-slate-800 text-xs flex items-center justify-start gap-1.5">
+                                <span>{m.standardNameFa || m.name}</span>
                                 {vendorCount > 0 && (
                                   <span className="bg-slate-100 text-slate-500 text-[9px] font-bold px-1.5 py-0.5 rounded-full" title="تعداد سازنده‌های فعال">
                                     {vendorCount} سورس
                                   </span>
                                 )}
-                                <span>{m.standardNameFa || m.name}</span>
                               </h4>
                               <p className="text-[10px] font-mono text-slate-400">{m.standardNameEn || m.nameEn}</p>
                             </div>
@@ -385,6 +410,7 @@ export const MaterialMasterView: React.FC<MaterialMasterViewProps> = ({
               <span>کل مواد یافت شده: {processedMaterials.length} مورد</span>
             </div>
           </div>
+          )}
         </div>
 
 

@@ -165,21 +165,25 @@ export function HomeView({
           </div>
           
           <div className="space-y-2">
-            {db.filter(v => v.status === 'new').slice(0, 3).map(v => (
-              <div key={v.id} className="bg-cyan-600/5 border border-cyan-600/10 rounded-xl px-4 py-2.5 flex items-center justify-between">
-                <div>
-                  <div className="text-slate-700 font-semibold text-sm">{v.name}</div>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-slate-400 text-xs">{v.material}</span>
-                    {(() => {
-                      const foundMat = materials.find(m => m.name === v.material || m.nameEn === v.materialEn);
-                      return foundMat ? <MaterialRoleBadge role={foundMat.role} className="scale-85 origin-right" /> : null;
-                    })()}
+            {db.filter(v => v.status === 'new').length === 0 ? (
+              <div className="text-cyan-700/60 text-xs text-center py-4 italic">هیچ موردی در این بخش وجود ندارد</div>
+            ) : (
+              db.filter(v => v.status === 'new').slice(0, 3).map(v => (
+                <div key={v.id} className="bg-cyan-600/5 border border-cyan-600/10 rounded-xl px-4 py-2.5 flex items-center justify-between">
+                  <div>
+                    <div className="text-slate-700 font-semibold text-sm">{v.name}</div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-slate-400 text-xs">{v.material}</span>
+                      {(() => {
+                        const foundMat = materials.find(m => m.name === v.material || m.nameEn === v.materialEn);
+                        return foundMat ? <MaterialRoleBadge role={foundMat.role} className="scale-85 origin-right" /> : null;
+                      })()}
+                    </div>
                   </div>
+                  <button onClick={() => onSelectVendor(v)} className="text-cyan-600 hover:text-cyan-800 text-xs underline underline-offset-2">مشاهده</button>
                 </div>
-                <button onClick={() => onSelectVendor(v)} className="text-cyan-600 hover:text-cyan-800 text-xs underline underline-offset-2">مشاهده</button>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>

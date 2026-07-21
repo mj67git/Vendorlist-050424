@@ -252,7 +252,7 @@ export default function App() {
             return res.json();
           })
           .then((data: Vendor[]) => {
-            if (Array.isArray(data) && data.length > 0) {
+            if (Array.isArray(data)) {
               const filtered = data.filter(isAllowedVendor).map(normalizeAndCleanVendor);
               setDb(filtered);
             }
@@ -706,14 +706,15 @@ export default function App() {
               <>
                 <SidebarButton 
                   icon={Archive} label="آرشیو کامل" 
+                  sub="COMPLETE ARCHIVE"
                   variant="archive"
                   active={view === 'archive' && !selectedVendor} 
                   onClick={() => navigate('archive')} 
                 />
                 <SidebarButton 
-                  icon={Activity} label="Audit & Activity Center" 
+                  icon={Activity} label="مرکز ممیزی و فعالیت‌ها" 
+                  sub="AUDIT & ACTIVITY CENTER"
                   variant="audit-center"
-                  sub="AUDIT TRAIL LOGS"
                   active={view === 'audit-center' && !selectedVendor} 
                   onClick={() => navigate('audit-center')} 
                 />
@@ -721,12 +722,14 @@ export default function App() {
             )}
             <SidebarButton 
               icon={Handshake} label="بررسی یکپارچه تامین‌کننده" 
+              sub="INTEGRATED SUPPLIER AUDIT"
               variant="supplier-audit"
               active={view === 'supplier-audit' && !selectedVendor} 
               onClick={() => navigate('supplier-audit')} 
             />
             <SidebarButton 
-              icon={Layers} label="بانک مواد اولیه (Material)" 
+              icon={Layers} label="بانک مواد اولیه" 
+              sub="MATERIAL MASTER BANK"
               variant="material-master"
               active={view === 'material-master' && !selectedVendor} 
               onClick={() => navigate('material-master')} 

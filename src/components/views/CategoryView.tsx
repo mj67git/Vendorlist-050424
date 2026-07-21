@@ -336,7 +336,8 @@ export function CategoryView({
         {groupsList.length === 0 && (
           <div className="text-center py-16 px-4 bg-white rounded-2xl border border-[#E5E5EA]">
             <Archive className="w-12 h-12 text-[#86868B] mx-auto mb-4" />
-            <h4 className="text-[#6E6E73] font-semibold text-lg">نتیجه‌ای یافت نشد</h4>
+            <h4 className="text-[#6E6E73] font-semibold text-lg mb-2">تأمین‌کننده‌ای یافت نشد</h4>
+            <p className="text-sm text-[#86868B]">هنوز هیچ تأمین‌کننده‌ای در این دسته‌بندی ثبت نشده است، و یا موردی با جستجوی شما مطابقت ندارد.</p>
           </div>
         )}
       </div>

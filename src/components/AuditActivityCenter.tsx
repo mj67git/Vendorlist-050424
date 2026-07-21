@@ -41,6 +41,17 @@ export interface AuditEvent {
   changes?: { field: string; before: string; after: string }[];
 }
 
+export function toEnglishDigits(str: string): string {
+  if (!str) return '';
+  const persianDigits = [/۰/g, /۱/g, /۲/g, /۳/g, /۴/g, /۵/g, /۶/g, /۷/g, /۸/g, /۹/g];
+  const arabicDigits = [/٠/g, /١/g, /٢/g, /٣/g, /٤/g, /٥/g, /٦/g, /٧/g, /٨/g, /٩/g];
+  let out = str;
+  for (let i = 0; i < 10; i++) {
+    out = out.replace(persianDigits[i], String(i)).replace(arabicDigits[i], String(i));
+  }
+  return out;
+}
+
 export function AuditActivityCenter({ db, materials, currentUser, onSelectVendor }: AuditActivityCenterProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPeriod, setSelectedPeriod] = useState('all'); // all, today, yesterday, week, month
@@ -75,114 +86,20 @@ export function AuditActivityCenter({ db, materials, currentUser, onSelectVendor
   // (e.g. Backups, Login, User Management, Exports, etc.)
   const prePopulatedLogs = useMemo(() => {
     const today = new Date().toLocaleDateString('fa-IR');
-    const yesterdayDate = new Date();
-    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
-    const yesterday = yesterdayDate.toLocaleDateString('fa-IR');
-    
-    const threeDaysAgoDate = new Date();
-    threeDaysAgoDate.setDate(threeDaysAgoDate.getDate() - 3);
-    const threeDaysAgo = threeDaysAgoDate.toLocaleDateString('fa-IR');
 
     return [
       {
-        id: 'mock_sys_1',
-        action: 'ورود موفق به سیستم (Login Successful)',
-        date: `${today}، ۰۹:۱۵:۲۲`,
-        user: 'مهندس جباری',
-        ipAddress: '10.50.12.87',
-        browser: 'Chrome 124.0.5',
-        os: 'Windows 11',
-        module: 'User Directory',
-        operation: 'Login',
-        status: 'Success'
-      },
-      {
-        id: 'mock_sys_2',
-        action: 'خروج موفق از سیستم (Logout Successful)',
-        date: `${yesterday}، ۱۷:۳۰:۱۰`,
-        user: 'مهندس جباری',
-        ipAddress: '10.50.12.87',
-        browser: 'Chrome 124.0.5',
-        os: 'Windows 11',
-        module: 'User Directory',
-        operation: 'Logout',
-        status: 'Info'
-      },
-      {
-        id: 'mock_sys_3',
-        action: 'پشتیبان‌گیری کامل از پایگاه داده (Full DB Backup Export)',
-        date: `${yesterday}، ۱۶:۴۵:۰۰`,
+        id: 'mock_sys_reset',
+        action: 'پاکسازی کامل اطلاعات آزمایشی و آماده‌سازی سیستم خام (System Data Reset & Initialization Successful)',
+        date: `${today}، ۰۸:۰۰:۰۰`,
         user: 'مدیریت سیستم',
-        ipAddress: '192.168.1.104',
-        browser: 'Firefox 125.0',
-        os: 'Linux (Ubuntu 22.04)',
-        module: 'System Controller',
-        operation: 'Export',
-        status: 'Success'
-      },
-      {
-        id: 'mock_sys_4',
-        action: 'بازیابی موفق پیکربندی سیستم (System Config Restore)',
-        date: `${threeDaysAgo}، ۱۰:۲۰:۱۴`,
-        user: 'مدیریت سیستم',
-        ipAddress: '192.168.1.104',
-        browser: 'Firefox 125.0',
-        os: 'Linux (Ubuntu 22.04)',
+        ipAddress: '127.0.0.1',
+        browser: 'System Core v2.0',
+        os: 'Production Env',
         module: 'System Controller',
         operation: 'System',
-        status: 'Warning',
-        changes: [
-          { field: 'سرور پشتیبان', before: 'Backup_SRV_Alpha', after: 'Backup_SRV_Beta' },
-          { field: 'حجم لیمیت فرستنده', before: '50MB', after: '100MB' }
-        ]
-      },
-      {
-        id: 'mock_sys_5',
-        action: 'ایجاد حساب کاربری جدید برای ناظر آزمایشگاه [دکتر مهدوی] با نقش کاربر عمومی',
-        date: `${threeDaysAgo}، ۰۸:۴۰:۰۲`,
-        user: 'مدیریت سیستم',
-        ipAddress: '192.168.1.104',
-        browser: 'Firefox 125.0',
-        os: 'Linux (Ubuntu 22.04)',
-        module: 'User Directory',
-        operation: 'Create',
-        status: 'Success'
-      },
-      {
-        id: 'mock_sys_6',
-        action: 'تغییر رمز عبور حساب کاربری واحد بازرگانی ارشد',
-        date: `${yesterday}، ۱۱:۰۲:۵۴`,
-        user: 'مدیریت سیستم',
-        ipAddress: '192.168.1.104',
-        browser: 'Chrome 124.0.5',
-        os: 'Windows 11',
-        module: 'User Directory',
-        operation: 'Update',
-        status: 'Info'
-      },
-      {
-        id: 'mock_sys_7',
-        action: 'ایجاد دسته ماده اولیه جدید در بانک اطلاعاتی (نام ماده: پاراستامول خالص)',
-        date: `${today}، ۰۸:۰۵:۰۰`,
-        user: 'مهندس جباری',
-        ipAddress: '10.50.12.87',
-        browser: 'Chrome 124.0.5',
-        os: 'Windows 11',
-        module: 'Material Master',
-        operation: 'Create',
-        status: 'Success'
-      },
-      {
-        id: 'mock_sys_8',
-        action: 'خروجی اکسل پیشرفته از لیست سورس‌های فعال بخش خرید خارجی',
-        date: `${today}، ۰۹:۴۰:۱۲`,
-        user: 'واحد کیفیت QA',
-        ipAddress: '172.16.8.99',
-        browser: 'Safari 17.4',
-        os: 'macOS Sonoma (14.4)',
-        module: 'System Controller',
-        operation: 'Export',
-        status: 'Success'
+        status: 'Success',
+        changes: undefined as { field: string; before: string; after: string }[] | undefined
       }
     ];
   }, []);
@@ -409,8 +326,8 @@ export function AuditActivityCenter({ db, materials, currentUser, onSelectVendor
 
       if (sortField === 'date') {
         // Numeric sort on date
-        const cleanA = a.rawDate.replace(/[^0-9]/g, '');
-        const cleanB = b.rawDate.replace(/[^0-9]/g, '');
+        const cleanA = toEnglishDigits(a.rawDate).replace(/[^0-9]/g, '').padEnd(14, '0');
+        const cleanB = toEnglishDigits(b.rawDate).replace(/[^0-9]/g, '').padEnd(14, '0');
         return sortOrder === 'asc' ? cleanA.localeCompare(cleanB) : cleanB.localeCompare(cleanA);
       } else if (sortField === 'user') {
         valA = a.user;
@@ -444,8 +361,8 @@ export function AuditActivityCenter({ db, materials, currentUser, onSelectVendor
     
     // Last activity time
     const sortedAll = [...allEvents].sort((a, b) => {
-      const cleanA = a.rawDate.replace(/[^0-9]/g, '');
-      const cleanB = b.rawDate.replace(/[^0-9]/g, '');
+      const cleanA = toEnglishDigits(a.rawDate).replace(/[^0-9]/g, '').padEnd(14, '0');
+      const cleanB = toEnglishDigits(b.rawDate).replace(/[^0-9]/g, '').padEnd(14, '0');
       return cleanB.localeCompare(cleanA);
     });
     const lastActive = sortedAll[0] ? sortedAll[0].timeOnly : '--:--';
@@ -487,8 +404,8 @@ export function AuditActivityCenter({ db, materials, currentUser, onSelectVendor
   // Short Timeline events (last 5 daily events for side chronological view)
   const timelineEvents = useMemo(() => {
     const sorted = [...allEvents].sort((a, b) => {
-      const cleanA = a.rawDate.replace(/[^0-9]/g, '');
-      const cleanB = b.rawDate.replace(/[^0-9]/g, '');
+      const cleanA = toEnglishDigits(a.rawDate).replace(/[^0-9]/g, '').padEnd(14, '0');
+      const cleanB = toEnglishDigits(b.rawDate).replace(/[^0-9]/g, '').padEnd(14, '0');
       return cleanB.localeCompare(cleanA);
     });
     return sorted.slice(0, 6);
@@ -539,7 +456,7 @@ export function AuditActivityCenter({ db, materials, currentUser, onSelectVendor
       if (cell) {
         cell.s = {
           font: { name: 'Segoe UI', sz: 10, bold: true, color: { rgb: 'FFFFFF' } },
-          fill: { patternType: 'solid', fgColor: { rgb: '1E293B' } }, // Slate-800
+          fill: { patternType: 'solid', fgColor: { rgb: '1E3A8A' } }, // Navy style matching Archive
           alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
           border: {
             top: { style: 'thin', color: { rgb: '475569' } },
@@ -558,13 +475,13 @@ export function AuditActivityCenter({ db, materials, currentUser, onSelectVendor
         const cell = ws[cellRef];
         if (cell) {
           cell.s = {
-            font: { name: 'Segoe UI', sz: 9, color: { rgb: '334155' } },
+            font: { name: 'Segoe UI', sz: 9, color: { rgb: '1E293B' } }, // Deep slate matching Archive
             alignment: { 
-              horizontal: col === 12 ? 'right' : 'center', 
+              horizontal: (col === 4 || col === 8 || col === 9 || col === 12) ? 'right' : 'center', // Right-align RTL texts
               vertical: 'center',
               wrapText: true
             },
-            fill: { patternType: 'solid', fgColor: { rgb: row % 2 === 0 ? 'F8FAFC' : 'FFFFFF' } },
+            fill: { patternType: 'solid', fgColor: { rgb: row % 2 === 0 ? 'F1F5F9' : 'FFFFFF' } }, // Slate-100 alternating rows matching Archive
             border: {
               top: { style: 'thin', color: { rgb: 'E2E8F0' } },
               bottom: { style: 'thin', color: { rgb: 'E2E8F0' } },
@@ -622,7 +539,8 @@ export function AuditActivityCenter({ db, materials, currentUser, onSelectVendor
 
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Log_Audit_Trail');
-    XLSX.writeFile(wb, `Audit_Trail_Report_${new Date().toLocaleDateString('fa-IR').replace(/\//g, '-')}.xlsx`);
+    const dateStr = new Date().toLocaleDateString('fa-IR').replace(/\//g, '-');
+    XLSX.writeFile(wb, `گزارش_لاگ_سیستم_${dateStr}.xlsx`);
   };
 
   const handleRefresh = () => {
@@ -983,65 +901,11 @@ export function AuditActivityCenter({ db, materials, currentUser, onSelectVendor
         </div>
       )}
 
-      {/* 4- MAIN LAYOUT: TABLE + TIMELINE SIDEBAR */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+      {/* 4- MAIN LAYOUT: TABLE + TIMELINE UNDERNEATH */}
+      <div className="space-y-6">
         
-        {/* LEFT COLUMN: TIMELINE (1/4 on desktop) */}
-        <div className="lg:col-span-1 bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-4 h-full">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <h3 className="text-xs font-bold text-slate-950 flex items-center gap-2">
-              <Terminal className="w-4 h-4 text-emerald-600" />
-              رویدادهای اخیر (Live Feed)
-            </h3>
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-          </div>
-
-          <div className="relative pr-4 border-r border-slate-200 space-y-6 py-2">
-            {timelineEvents.map((te, idx) => {
-              const badge = getOperationBadgeConfig(te.operation);
-              const opColor = badge.color;
-              
-              return (
-                <div key={te.id} className="relative group transition-all">
-                  
-                  {/* Timeline connector circle */}
-                  <span className={`absolute -right-[21px] top-1.5 w-2.5 h-2.5 rounded-full border-2 border-white ring-4 ring-slate-100 ${
-                    te.operation === 'Create' ? 'bg-emerald-500' :
-                    te.operation === 'Delete' ? 'bg-rose-500' :
-                    te.operation === 'Laboratory Result' ? 'bg-orange-500' :
-                    te.operation === 'Export' ? 'bg-purple-500' : 'bg-blue-500'
-                  }`} />
-
-                  {/* Feed item content */}
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between gap-1 text-[10px]">
-                      <span className="font-mono font-bold text-slate-400">{te.rawDate.substring(11, 19) || te.timeOnly}</span>
-                      <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold border ${opColor}`}>
-                        {te.operation}
-                      </span>
-                    </div>
-                    <p className="text-slate-800 text-[11px] leading-relaxed font-medium line-clamp-2" title={te.action}>
-                      {te.action}
-                    </p>
-                    <div className="flex items-center gap-1.5 text-[9px] text-slate-400 font-semibold font-mono">
-                      <span>👤 {te.user}</span>
-                      <span className="text-slate-300">•</span>
-                      <span>🖥️ {te.ipAddress}</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="bg-slate-50 rounded-xl p-3 border border-slate-200/50 text-[10px] text-slate-500 text-center space-y-1 leading-relaxed">
-            <div className="font-bold text-slate-700">پشتیبان امنیتی کالا و سورس</div>
-            <div>تمام فعالیتهای سیستمی توسط فریمورک یکپارچه QMS مانیتور و لاگ می‌شوند.</div>
-          </div>
-        </div>
-
-        {/* RIGHT COLUMN: MAIN LOGS TABLE (3/4 on desktop) */}
-        <div className="lg:col-span-3 bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+        {/* MAIN LOGS TABLE (Now occupies full 100% width) */}
+        <div className="w-full bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
           
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between p-4 border-b border-slate-100 gap-4 bg-slate-50/50">
             <div className="flex items-center gap-2">
@@ -1231,6 +1095,68 @@ export function AuditActivityCenter({ db, materials, currentUser, onSelectVendor
             </div>
           )}
         </div>
+
+        {/* TIMELINE / LIVE FEED SECTION (Now underneath, beautifully formatted) */}
+        <div className="w-full bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-5">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h3 className="text-xs font-bold text-slate-950 flex items-center gap-2">
+              <Terminal className="w-4 h-4 text-emerald-600" />
+              رویدادهای اخیر (Live Feed)
+            </h3>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+              <span className="text-[10px] text-emerald-600 font-bold">پایش زنده</span>
+            </span>
+          </div>
+
+          <div className="space-y-3">
+            {timelineEvents.map((te, idx) => {
+              const badge = getOperationBadgeConfig(te.operation);
+              const opColor = badge.color;
+              
+              return (
+                <div 
+                  key={te.id} 
+                  className="group transition-all bg-slate-50/50 hover:bg-slate-50 border border-slate-100 hover:border-slate-200 px-4 py-3 rounded-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-right"
+                >
+                  {/* Operation Badge & Time Info */}
+                  <div className="flex items-center gap-2.5 shrink-0 select-none">
+                    <span className="font-mono font-bold text-slate-500 text-xs bg-slate-100 px-2.5 py-1 rounded-lg">
+                      {te.rawDate.substring(11, 19) || te.timeOnly}
+                    </span>
+                    <span className={`px-2.5 py-1 rounded-lg text-[9px] font-bold border ${opColor} uppercase tracking-wider`}>
+                      {te.operation}
+                    </span>
+                  </div>
+
+                  {/* Main Event Action Description */}
+                  <div className="flex-1 text-slate-800 text-xs leading-relaxed font-bold break-words w-full">
+                    {te.action}
+                  </div>
+
+                  {/* Metadata (User & IP Address) */}
+                  <div className="flex items-center gap-3 shrink-0 text-[10px] text-slate-400 font-semibold font-mono border-t md:border-t-0 border-slate-100 pt-2 md:pt-0 w-full md:w-auto justify-between md:justify-end" dir="ltr">
+                    <span className="flex items-center gap-1">
+                      <span>{te.user}</span>
+                      <span className="text-slate-300">👤</span>
+                    </span>
+                    <span className="text-slate-300 select-none">•</span>
+                    <span className="flex items-center gap-1">
+                      <span>{te.ipAddress}</span>
+                      <span className="text-slate-300">🖥️</span>
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="bg-slate-50 rounded-xl p-4 border border-slate-200/50 text-[10px] text-slate-500 flex flex-col sm:flex-row justify-between items-center gap-2 leading-relaxed">
+            <div className="font-bold text-slate-700">پشتیبان امنیتی کالا و سورس</div>
+            <div>تمام فعالیتهای سیستمی توسط فریمورک یکپارچه QMS مانیتور و لاگ می‌شوند.</div>
+          </div>
+        </div>
+
       </div>
 
       {/* 5- EVENT DETAIL SIDE PANEL (DRAWER) */}

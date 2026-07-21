@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { 
-  Search, X, Download, ChevronDown, Archive, Printer, Activity 
+  Search, X, Download, ChevronDown, Archive, Printer 
 } from 'lucide-react';
 import { Vendor, User, Category } from '../../types';
 import { Material } from '../MaterialForm';
@@ -171,7 +171,7 @@ export function ArchiveView({ db, currentUser, materials = [] }: ArchiveViewProp
           {filteredDb.length === 0 ? (
             <div className="p-12 text-center text-slate-400 flex flex-col items-center">
               <Search className="w-8 h-8 opacity-20 mb-3" />
-              <span>هیچ نتیجه‌ای یافت نشد.</span>
+              <span>هیچ رکورد تأمین‌کننده‌ای یافت نشد.</span>
             </div>
           ) : filteredDb.map((v, i) => (
             <div key={v.id} className="grid grid-cols-12 gap-4 px-5 py-3.5 items-center hover:bg-slate-50 transition-colors vendor-row" style={{ animationDelay: `${i * 20}ms` }}>
@@ -217,87 +217,6 @@ export function ArchiveView({ db, currentUser, materials = [] }: ArchiveViewProp
           ))}
         </div>
       </div>
-
-      {/* GENERAL ACTIVITY LOG FOR ADMINS */}
-      {currentUser?.role === 'admin' && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl text-right font-sans text-xs text-slate-300">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-slate-800 pb-4 mb-6 gap-2">
-             <div className="flex items-center gap-2">
-                <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider animate-pulse font-mono">● SYSTEM AUDIT LOGS</span>
-                <span className="text-[10px] text-slate-500 font-mono">Operator: {currentUser.name}</span>
-             </div>
-             <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
-                تاریخچه و لاگ سراسری سیستم (Global Audit Activity Logs)
-                <Activity className="w-4 h-4 text-emerald-400" />
-             </h3>
-          </div>
-          
-          <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar bg-slate-950 p-4 rounded-xl border border-slate-800/80">
-             {(() => {
-                // Collect and sort all logs across all vendors
-                const allLogs = db.flatMap(vendor => {
-                  return (vendor.activityLogs || []).map(log => ({
-                     ...log,
-                     vendorName: vendor.name,
-                     vendorId: vendor.id,
-                     vendorMaterial: vendor.material
-                  }));
-                });
-
-                // Sort logs by date
-                const sortedLogs = allLogs.sort((a, b) => {
-                   const aClean = a.date.replace(/[^0-9]/g, '');
-                   const bClean = b.date.replace(/[^0-9]/g, '');
-                   return bClean.localeCompare(aClean);
-                });
-
-                if (sortedLogs.length === 0) {
-                   return (
-                      <div className="text-center py-8 text-slate-500 italic">
-                         هیچ رویداد یا لاگ سیستمی در پایگاه داده ثبت نشده است.
-                      </div>
-                   );
-                }
-
-                return sortedLogs.map((log) => (
-                   <div key={log.id} className="flex flex-col md:flex-row items-stretch justify-between gap-4 border-b border-slate-800/40 py-2.5 hover:bg-slate-900/40 px-3 rounded transition-all group">
-                      <div className="flex-1 flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                         {/* Username */}
-                         <div className="text-emerald-400 shrink-0 select-none flex items-center gap-1 font-mono text-[11px] bg-slate-900/80 px-2 py-0.5 rounded border border-slate-800">
-                            <span className="text-slate-600">[</span>
-                            <span>{log.user}</span>
-                            <span className="text-slate-600">]</span>
-                         </div>
-                         {/* Action Message */}
-                         <div className="text-slate-200 break-words leading-relaxed text-xs">
-                            {(() => {
-                               const txt = log.action || '';
-                               if (txt.includes('ثبت سورس جدید') || txt.includes('ایجاد')) return '🟢 ' + txt;
-                               if (txt.includes('ویرایش') || txt.includes('تغییر')) return '🔵 ' + txt;
-                               if (txt.includes('حذف')) return '🔴 ' + txt;
-                               if (txt.includes('نتیجه آزمایش')) return '🟠 ' + txt;
-                               if (txt.includes('ارزیابی ریسک') || txt.includes('ارزیابی نهایی')) return '🟤 ' + txt;
-                               return '⚪ ' + txt;
-                            })()}
-                         </div>
-                      </div>
-                      
-                      {/* Timestamp & Meta */}
-                      <div className="flex items-center gap-3 shrink-0 text-slate-500 text-[10px] select-none text-left font-mono justify-end mt-2 md:mt-0" dir="ltr">
-                         <span className="bg-slate-800 border border-slate-700/50 px-2 py-0.5 rounded text-slate-400 group-hover:bg-[#0071E3] group-hover:text-white group-hover:border-[#0071E3] transition-all">{log.vendorName}</span>
-                         <span className="text-slate-400">{log.date}</span>
-                      </div>
-                   </div>
-                ));
-             })()}
-          </div>
-          
-          <div className="mt-4 flex flex-col sm:flex-row justify-between items-start sm:items-center text-[10px] text-slate-500 select-none gap-2 px-1">
-             <span>مکانیزم پایش سراسری: پایش درج، ویرایش جزئیات سورس، ارزیابی، ریسک کنترلر و تست‌های آزمایشگاهی</span>
-             <span>سیستم کنترلی تامین داروپخش تماد (TEMAD Audit System CLI-v1.2.4)</span>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

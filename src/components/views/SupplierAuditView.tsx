@@ -378,8 +378,8 @@ export function SupplierAuditView({ db, onSelectVendor, currentUser }: SupplierA
             {filteredSuppliers.length === 0 ? (
               <div className="col-span-full bg-white border border-slate-200 p-16 rounded-2xl text-center text-slate-400 flex flex-col items-center">
                 <Building className="w-12 h-12 opacity-20 mb-4 text-teal-600" />
-                <span className="font-bold text-slate-600 text-lg">هیچ تامین‌کننده‌ای یافت نشد.</span>
-                <p className="text-slate-400 text-sm mt-1">تغییر کوئری بدهید یا نام انگلیسی دقیق یا فارسی را وارد نمایید.</p>
+                <span className="font-bold text-slate-600 text-lg">تأمین‌کننده‌ای ثبت نشده است</span>
+                <p className="text-slate-400 text-sm mt-1">هنوز هیچ تأمین‌کننده‌ای در سیستم ثبت نشده است، و یا کوئری جستجوی شما مطابقت ندارد.</p>
               </div>
             ) : (
               filteredSuppliers.map((supplier) => {

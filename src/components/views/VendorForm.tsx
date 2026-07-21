@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CheckCircle, Building, Plus, X } from 'lucide-react';
+import { CheckCircle, Building, Plus, X, AlertTriangle } from 'lucide-react';
 import { Category, Vendor, User } from '../../types';
 import { Material } from '../MaterialForm';
 import { ShamsiDatePicker } from '../ShamsiDatePicker';
@@ -46,6 +46,55 @@ export function VendorForm({
     existingVendor?.status === 'conditional' ? 'not_approved' : 'approved'
   );
 
+  const [pendingChange, setPendingChange] = useState<{
+    type: 'toggle_sample' | 'change_sample_status';
+    nextValue: any;
+    message: string;
+  } | null>(null);
+
+  const handleSampleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const nextVal = e.target.checked;
+    const message = nextVal 
+      ? 'آیا مطمئن هستید که می‌خواهید وضعیت این سورس را به «نمونه تستی (Sample)» تغییر دهید؟ در این صورت گرید و فرآیند ارزیابی کیفی تجاری غیرفعال خواهد شد.'
+      : 'آیا مطمئن هستید که می‌خواهید این سورس را از حالت «نمونه تستی (Sample)» خارج کنید؟ در این صورت به عنوان یک سورس تجاری عادی تغییر خواهد یافت.';
+    
+    setPendingChange({
+      type: 'toggle_sample',
+      nextValue: nextVal,
+      message
+    });
+  };
+
+  const handleSampleStatusSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const nextVal = e.target.value;
+    const labelMap: Record<string, string> = {
+      approved: 'Approved (تایید شده)',
+      not_approved: 'Approved conditional (تایید مشروط)',
+      rejected: 'Reject (رد شده)'
+    };
+    const message = `آیا مطمئن هستید که می‌خواهید وضعیت نمونه را به «${labelMap[nextVal] || nextVal}» تغییر دهید؟`;
+    
+    setPendingChange({
+      type: 'change_sample_status',
+      nextValue: nextVal,
+      message
+    });
+  };
+
+  const handleConfirmChange = () => {
+    if (!pendingChange) return;
+    if (pendingChange.type === 'toggle_sample') {
+      setIsSample(pendingChange.nextValue);
+    } else if (pendingChange.type === 'change_sample_status') {
+      setSampleStatus(pendingChange.nextValue);
+    }
+    setPendingChange(null);
+  };
+
+  const handleCancelChange = () => {
+    setPendingChange(null);
+  };
+
   const [formData, setFormData] = useState({
     material: existingVendor?.material || '',
     materialEn: existingVendor?.materialEn || '',
@@ -77,11 +126,8 @@ export function VendorForm({
     if (existingVendor) {
       finalGrade = existingVendor.grade;
       finalStatus = existingVendor.status;
-      finalIsSample = !!existingVendor.isSample;
-      finalCategory = existingVendor.category;
-      if (!existingVendor.isSample && existingVendor.category !== 'blacklist') {
-        finalCategory = sourceType as Category;
-      }
+      finalIsSample = isSample;
+      
       if (finalIsSample) {
         finalCategory = 'sample';
         if (sampleStatus === 'rejected') {
@@ -90,6 +136,18 @@ export function VendorForm({
           finalStatus = 'conditional';
         } else {
           finalStatus = 'approved';
+        }
+        finalGrade = null;
+      } else {
+        if (existingVendor.isSample) {
+          finalCategory = sourceType as Category;
+          finalStatus = 'new';
+          finalGrade = 'new';
+        } else {
+          finalCategory = sourceType as Category;
+          if (existingVendor.category === 'blacklist') {
+            finalCategory = 'blacklist';
+          }
         }
       }
     } else {
@@ -186,7 +244,8 @@ export function VendorForm({
   }
 
   return (
-    <div className="bg-white border border-[#E5E5EA] rounded-2xl w-full shadow-[0_8px_30px_rgba(0,0,0,0.04)] text-right mt-6 fade-in" dir="rtl">
+    <>
+      <div className="bg-white border border-[#E5E5EA] rounded-2xl w-full shadow-[0_8px_30px_rgba(0,0,0,0.04)] text-right mt-6 fade-in" dir="rtl">
       <div className="p-6 border-b border-[#E5E5EA] flex justify-between items-center bg-[#F5F5F7]/40 rounded-t-2xl">
         <h2 className="text-lg font-bold flex items-center gap-2 text-[#1D1D1F]">
           {existingVendor ? <Building className="w-5 h-5 text-[#0071E3]" /> : <Plus className="w-5 h-5 text-[#0071E3]" />}
@@ -210,30 +269,32 @@ export function VendorForm({
               </select>
             </div>
             
-            {!existingVendor && (
-              <div className="flex flex-col gap-4">
-                <label className="flex items-center gap-2 cursor-pointer mt-1">
-                  <input 
-                    type="checkbox" 
-                    checked={isSample} 
-                    onChange={e => setIsSample(e.target.checked)}
-                    className="w-4 h-4 text-[#0071E3] rounded border-[#D2D2D7] focus:ring-[#0071E3]"
-                  />
-                  <span className="text-sm font-bold text-[#1D1D1F]">این تامین‌کننده به عنوان یک «نمونه» ثبت می‌شود</span>
-                </label>
+            <div className="flex flex-col gap-4">
+              <label className="flex items-center gap-2 cursor-pointer mt-1">
+                <input 
+                  type="checkbox" 
+                  checked={isSample} 
+                  onChange={handleSampleCheckboxChange}
+                  className="w-4 h-4 text-[#0071E3] rounded border-[#D2D2D7] focus:ring-[#0071E3]"
+                />
+                <span className="text-sm font-bold text-[#1D1D1F]">این تامین‌کننده به عنوان یک «نمونه تستی (Sample)» ثبت می‌شود</span>
+              </label>
 
-                {isSample && (
-                  <div className="space-y-1 fade-in">
-                    <label className="text-[#1D1D1F] font-semibold text-xs">وضعیت نمونه (Sample Status)</label>
-                    <select className="w-full bg-white border border-[#D2D2D7] rounded-lg px-3 py-2 text-[#1D1D1F] focus:outline-none focus:ring-1 focus:ring-[#0071E3]" value={sampleStatus} onChange={e => setSampleStatus(e.target.value)}>
-                      <option value="approved">Approved (تایید شده)</option>
-                      <option value="not_approved">Approved conditional (تایید مشروط)</option>
-                      <option value="rejected">Reject (رد شده)</option>
-                    </select>
-                  </div>
-                )}
-              </div>
-            )}
+              {isSample && (
+                <div className="space-y-1 fade-in">
+                  <label className="text-[#1D1D1F] font-semibold text-xs">وضعیت نمونه (Sample Status)</label>
+                  <select 
+                    className="w-full bg-white border border-[#D2D2D7] rounded-lg px-3 py-2 text-[#1D1D1F] focus:outline-none focus:ring-1 focus:ring-[#0071E3]" 
+                    value={sampleStatus} 
+                    onChange={handleSampleStatusSelectChange}
+                  >
+                    <option value="approved">Approved (تایید شده)</option>
+                    <option value="not_approved">Approved conditional (تایید مشروط)</option>
+                    <option value="rejected">Reject (رد شده)</option>
+                  </select>
+                </div>
+              )}
+            </div>
           </div>
 
           {materials.length > 0 && (
@@ -358,5 +419,40 @@ export function VendorForm({
           </div>
         </form>
       </div>
+
+      {pendingChange && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-50 flex items-center justify-center p-4 animate-fade-in" dir="rtl">
+          <div className="bg-white border border-[#E5E5EA] rounded-2xl max-w-md w-full p-6 text-right shadow-[0_12px_40px_rgba(0,0,0,0.12)] space-y-4 animate-scale-in">
+            <div className="flex items-center gap-3 border-b border-[#E5E5EA] pb-3">
+              <div className="bg-amber-50 p-2 rounded-full border border-amber-200">
+                <AlertTriangle className="w-5 h-5 text-amber-600" />
+              </div>
+              <h3 className="text-base font-bold text-[#1D1D1F]">نیاز به تایید تغییر</h3>
+            </div>
+            
+            <p className="text-[#424245] text-sm leading-relaxed font-medium">
+              {pendingChange.message}
+            </p>
+            
+            <div className="flex justify-end gap-3 pt-2">
+              <button 
+                type="button" 
+                onClick={handleCancelChange} 
+                className="px-4 py-2 rounded-lg text-[#6E6E73] hover:text-[#1D1D1F] hover:bg-[#F5F5F7] transition-all font-semibold text-xs cursor-pointer"
+              >
+                انصراف
+              </button>
+              <button 
+                type="button" 
+                onClick={handleConfirmChange} 
+                className="px-5 py-2 rounded-lg bg-[#0071E3] hover:bg-[#0025D2] text-white font-bold transition-all shadow-sm text-xs cursor-pointer"
+              >
+                تایید و اعمال تغییر
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
