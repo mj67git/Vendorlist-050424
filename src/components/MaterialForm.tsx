@@ -83,23 +83,35 @@ export const MaterialForm: React.FC<MaterialFormProps> = ({
       : materials;
 
     const trimmedCas = cas.trim();
+    const trimmedParent = parentProduct.trim();
+    const trimmedParentEn = parentProductEn.trim();
+
     setIsDuplicateCas(
       trimmedCas !== '' && trimmedCas !== 'N/A' && trimmedCas !== 'NA' &&
-      otherMaterials.some(m => m.cas?.toLowerCase().trim() === trimmedCas.toLowerCase())
+      otherMaterials.some(m => 
+        m.cas?.toLowerCase().trim() === trimmedCas.toLowerCase() &&
+        (m.parentProduct?.toLowerCase().trim() === trimmedParent.toLowerCase() || trimmedParent === '')
+      )
     );
 
     const trimmedFa = name.trim();
     setIsDuplicateNameFa(
       trimmedFa !== '' &&
-      otherMaterials.some(m => m.name?.toLowerCase().trim() === trimmedFa.toLowerCase())
+      otherMaterials.some(m => 
+        m.name?.toLowerCase().trim() === trimmedFa.toLowerCase() &&
+        (m.parentProduct?.toLowerCase().trim() === trimmedParent.toLowerCase() || trimmedParent === '')
+      )
     );
 
     const trimmedEn = nameEn.trim();
     setIsDuplicateNameEn(
       trimmedEn !== '' &&
-      otherMaterials.some(m => m.nameEn?.toLowerCase().trim() === trimmedEn.toLowerCase())
+      otherMaterials.some(m => 
+        m.nameEn?.toLowerCase().trim() === trimmedEn.toLowerCase() &&
+        (m.parentProductEn?.toLowerCase().trim() === trimmedParentEn.toLowerCase() || trimmedParentEn === '')
+      )
     );
-  }, [cas, name, nameEn, materials, existingMaterial]);
+  }, [cas, name, nameEn, parentProduct, parentProductEn, materials, existingMaterial]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

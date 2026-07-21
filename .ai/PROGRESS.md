@@ -17,6 +17,7 @@ We have built a fully capable Vendor Quality Management System with robust user 
 - **Material Master Table Column Alignment Fix**: Corrected visual columns layout in the chemical master list by configuring explicit matching widths (`table-fixed`) and aligning flexbox directions perfectly with Persian RTL styling guidelines.
 - **Redundant Global Activity Logs Clean Up**: Completely removed the legacy "Global Audit Activity Logs" block from the Archive View to centralize and secure all log monitoring inside the dedicated Audit & Activity Center.
 - **Audit Log Live Feed Repositioning & Full-Width List Layout**: Repositioned the live timeline feed underneath the central changes table to give the change logs table full 100% desktop width, and redesigned the feed as beautiful horizontal full-width rows to optimize space usage and information density.
+- **Multi-Product Material Mapping duplicate validation**: Re-engineered raw material duplicate validations in the Material Master Registry. Duplicate warnings are now context-aware and only flag matching CAS/Names if they belong to the *same* finished product, allowing effortless multi-product ingredient registrations under unique IDs.
 
 ## 3. Current Work
 - Purifying historic Git version-controlled history using automated history filtering.

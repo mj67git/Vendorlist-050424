@@ -1,5 +1,11 @@
 # System Changelog
 
+## [2026-07-21] - Multi-Product Material Mapping duplicate validation
+### Changed
+- Re-architected duplicate substance checking in `MaterialForm.tsx`.
+- The system now allows seamless multi-product raw material mapping: a "duplicate" warning is strictly raised only if the same CAS Number or Standard Name is mapped to the *same* finished product (`parentProduct`). Mapping the same chemical ingredient to different products now bypasses duplicate warnings naturally.
+- Validated that duplicate entries generate independent unique database records safely with zero code conflict or database overwriting.
+
 ## [2026-07-21] - Audit Log Live Feed Repositioning & Full-Width List Layout
 ### Changed
 - Repositioned the **Recent Events / Live Feed (رویدادهای اخیر)** timeline from the sidebar column to underneath the main changes table inside the **Audit & Activity Center** (`AuditActivityCenter.tsx`).
