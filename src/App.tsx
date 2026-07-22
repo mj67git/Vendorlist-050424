@@ -648,50 +648,50 @@ export default function App() {
         ::-webkit-scrollbar-thumb:hover { background: #F5F5F7; }
       `}</style>
 
-      <div dir="rtl" className="min-h-screen bg-slate-100 text-slate-600 flex overflow-hidden print:overflow-visible print:bg-white print:text-black print:block">
+      <div dir="rtl" className="min-h-screen bg-slate-50/80 text-slate-800 flex overflow-hidden print:overflow-visible print:bg-white print:text-black print:block font-sans">
         
         {/* Mobile Sidebar Overlay */}
         {sidebarOpen && (
           <div 
-            className="fixed inset-0 bg-slate-900/40 backdrop-blur-[4px] z-20 md:hidden fade-in-fast" 
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-20 md:hidden fade-in-fast" 
             onClick={() => setSidebarOpen(false)}
           />
         )}
 
         {/* LEFT PANEL: Fixed Sidebar */}
         <aside className={`
-          fixed top-0 bottom-0 right-0 z-30 w-[272px] bg-white/75 backdrop-blur-md border-l border-slate-900/10 
+          fixed top-0 bottom-0 right-0 z-30 w-[272px] bg-white border-l border-slate-200/80 
           transform transition-transform duration-300 ease-in-out md:translate-x-0 slide-in print:hidden
           ${sidebarOpen ? 'translate-x-0' : 'translate-x-full'}
-          flex flex-col
+          flex flex-col shadow-xs
         `}>
           {/* BRAND BLOCK */}
-          <div className="px-5 py-5 border-b border-slate-900/10 flex items-center justify-between">
+          <div className="px-5 py-5 border-b border-slate-200/60 flex items-center justify-between bg-slate-50/40">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center shrink-0">
-                <img src={temadLogo} alt="Logo" className="h-16 w-auto object-contain" />
+              <div className="flex items-center justify-center shrink-0 p-1.5 rounded-xl bg-white border border-slate-200/60 shadow-2xs">
+                <img src={temadLogo} alt="Logo" className="h-12 w-auto object-contain" />
               </div>
               <div className="flex flex-col justify-center text-right">
-                <span className="font-black text-slate-800 text-xs sm:text-sm leading-snug tracking-tight">Vendor List & Supplier</span>
-                <span className="text-cyan-600 font-mono text-[10px] sm:text-[11px] mt-0.5 tracking-tighter uppercase whitespace-normal leading-tight max-w-[170px] font-bold">Evaluation System</span>
+                <span className="font-bold text-slate-800 text-xs sm:text-sm leading-snug tracking-tight">سامانه ارزیابی تامین‌کنندگان</span>
+                <span className="text-cyan-600 font-mono text-[10px] mt-0.5 tracking-wider uppercase font-bold">Vendor Management Portal</span>
               </div>
             </div>
             <button 
-              className="md:hidden text-slate-400 hover:text-slate-700"
+              className="md:hidden text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
               onClick={() => setSidebarOpen(false)}
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto custom-scrollbar">
             <SidebarButton 
               icon={Home} label="صفحه اصلی" 
               variant="home"
               active={view === 'home' && !selectedVendor} 
               onClick={() => navigate('home')} 
             />
-            <div className="pt-5 pb-2 px-4 text-xs font-mono uppercase tracking-widest text-slate-300">CATEGORIES</div>
+            <div className="pt-5 pb-2 px-4 text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">دسته‌بندی‌های تامین‌کنندگان</div>
             {(Object.entries(categoryLabels) as [Category, any][]).map(([id, meta]) => (
               <SidebarButton 
                 key={id}
@@ -701,7 +701,7 @@ export default function App() {
                 onClick={() => navigate('category', id)} 
               />
             ))}
-            <div className="pt-5 pb-2 px-4 text-xs font-mono uppercase tracking-widest text-slate-300">MANAGEMENT</div>
+            <div className="pt-5 pb-2 px-4 text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">مدیریت و گزارشات ارزیابی</div>
             {currentUser?.role === 'admin' && (
               <>
                 <SidebarButton 
@@ -738,10 +738,10 @@ export default function App() {
           </nav>
 
           {currentUser && (
-            <div className="px-5 py-4 border-t border-slate-900/10 flex items-center justify-between gap-3 bg-slate-50/40">
+            <div className="px-4 py-3.5 border-t border-slate-200/80 flex items-center justify-between gap-3 bg-slate-50/50">
               <div className="flex items-center gap-2 overflow-hidden text-right">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                <span className="text-xs font-bold text-slate-600 truncate">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/30 animate-pulse" />
+                <span className="text-xs font-semibold text-slate-700 truncate">
                   {currentUser.role === 'admin' ? 'مدیریت سیستم' : 
                    currentUser.role === 'qa' ? 'واحد کیفیت QA' : 
                    currentUser.role === 'commercial' ? 'واحد بازرگانی' : 
@@ -752,7 +752,7 @@ export default function App() {
               <div className="flex items-center gap-1.5 shrink-0">
                 <button 
                   onClick={() => setShowChangePasswordModal(true)} 
-                  className="flex items-center justify-center p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 transition-all duration-200 hover:shadow-xs cursor-pointer" 
+                  className="flex items-center justify-center p-2 rounded-xl text-slate-500 hover:text-cyan-600 hover:bg-slate-100 border border-slate-200/60 transition-all duration-200 cursor-pointer" 
                   title="تغییر کلمه عبور"
                 >
                   <Shield className="w-4 h-4" />
@@ -764,7 +764,7 @@ export default function App() {
                     localStorage.removeItem('app_viewHistory');
                     setCurrentUser(null);
                   }} 
-                  className="flex items-center justify-center p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 border border-slate-200 hover:border-red-200 transition-all duration-200 hover:shadow-xs cursor-pointer" 
+                  className="flex items-center justify-center p-2 rounded-xl text-slate-500 hover:text-rose-600 hover:bg-slate-100 border border-slate-200/60 transition-all duration-200 cursor-pointer" 
                   title="خروج"
                 >
                   <X className="w-4 h-4" />
@@ -778,10 +778,10 @@ export default function App() {
         <main className="flex-1 md:pr-[272px] flex flex-col h-screen overflow-hidden print:h-auto print:overflow-visible print:pr-0 print:block">
           
           {/* Sticky Topbar */}
-          <header className="sticky top-0 z-10 bg-white/85 backdrop-blur-[12px] border-b border-slate-900/10 px-5 py-3 flex items-center justify-between shrink-0 print:hidden shadow-[0_1px_4px_rgba(15,23,42,0.06)]">
+          <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-xl border-b border-slate-200/80 px-5 py-3 flex items-center justify-between shrink-0 print:hidden shadow-xs">
             <div className="flex items-center gap-4">
               <button 
-                className="md:hidden p-2 rounded-xl text-slate-400 bg-transparent hover:bg-slate-100 hover:text-slate-700 transition-colors focus:outline-none"
+                className="md:hidden p-2 rounded-xl text-slate-500 bg-slate-100 hover:bg-slate-200 hover:text-slate-800 transition-colors focus:outline-none cursor-pointer"
                 onClick={() => setSidebarOpen(true)}
               >
                 <Menu className="w-5 h-5" />
@@ -792,7 +792,7 @@ export default function App() {
                 {viewHistory.length > 1 && (
                   <button 
                     onClick={goBack}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl transition-all duration-200 active:scale-95 cursor-pointer shadow-xs select-none"
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all duration-200 active:scale-95 cursor-pointer shadow-2xs select-none"
                     title="برگشت به مرحله قبل"
                   >
                     <ChevronRight className="w-4 h-4 text-slate-500" />
@@ -808,10 +808,10 @@ export default function App() {
                      if (!label) return null;
                      return (
                        <React.Fragment key={idx}>
-                         {idx > 0 && <ChevronLeft className="w-3.5 h-3.5 opacity-50 shrink-0" />}
+                         {idx > 0 && <ChevronLeft className="w-3.5 h-3.5 opacity-40 shrink-0" />}
                          <button 
                            onClick={() => setViewHistory(prev => prev.slice(0, idx + 1))}
-                           className={`truncate transition-colors ${isLast ? 'font-bold text-slate-700 pointer-events-none' : 'hover:text-[#0071E3] cursor-pointer'}`}
+                           className={`truncate transition-colors ${isLast ? 'font-bold text-slate-800 pointer-events-none' : 'hover:text-cyan-600 cursor-pointer'}`}
                          >
                            {label}
                          </button>
@@ -821,11 +821,11 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Beautiful Live System Clock & Calendar */}
-              <div className="hidden sm:flex items-center gap-2.5 px-3.5 py-1.5 bg-slate-50 border border-slate-200/60 rounded-xl text-xs font-sans" dir="rtl">
-                <span className="font-semibold text-slate-700">{systemTime.faDate}</span>
+              {/* Live System Clock & Calendar */}
+              <div className="hidden sm:flex items-center gap-2.5 px-3.5 py-1.5 bg-slate-100/80 border border-slate-200/80 rounded-xl text-xs font-sans shadow-2xs" dir="rtl">
+                <span className="font-medium text-slate-700">{systemTime.faDate}</span>
                 <span className="text-slate-300">|</span>
-                <span className="font-mono font-bold text-[#0071E3] tracking-widest leading-none mt-[1px]" dir="ltr">{systemTime.time}</span>
+                <span className="font-mono font-bold text-cyan-700 tracking-wider leading-none" dir="ltr">{systemTime.time}</span>
               </div>
             </div>
             
@@ -833,17 +833,17 @@ export default function App() {
               {currentUser?.role === 'admin' && (
                 <button 
                   onClick={handleDownloadBackup}
-                  className="text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200/80 px-3 py-1.5 rounded-xl transition-all active:scale-95 flex items-center gap-1.5 shadow-sm cursor-pointer"
+                  className="text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl transition-all active:scale-95 flex items-center gap-1.5 shadow-2xs cursor-pointer"
                   title="دانلود پشتیبان کامل پایگاه‌داده (JSON)"
                 >
-                  <Download className="w-3.5 h-3.5 text-[#0071E3]" />
+                  <Download className="w-3.5 h-3.5 text-cyan-600" />
                   <span className="hidden md:inline">پشتیبان‌گیری کامل (JSON)</span>
                 </button>
               )}
 
-              <div className="bg-slate-900/5 border border-slate-900/10 px-3 py-1.5 rounded-full flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
-                <span className="text-xs font-mono font-semibold text-emerald-800">سیستم فعال</span>
+              <div className="bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full flex items-center gap-2 shadow-2xs">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-xs font-mono font-semibold text-emerald-700">سیستم فعال</span>
               </div>
             </div>
           </header>
@@ -989,7 +989,7 @@ const SidebarButton: React.FC<{ icon: any, label: string, sub?: string, active: 
         w-8 h-8 rounded-lg shrink-0 flex items-center justify-center font-mono text-xs font-black transition-all duration-300
         ${active 
           ? currentStyle.iconActiveClass 
-          : `bg-slate-900/5 border border-slate-900/10 text-slate-400 ${currentStyle.iconHoverClass}`
+          : `bg-slate-50 border border-slate-200/60 text-slate-400 group-hover:bg-slate-100 ${currentStyle.iconHoverClass}`
         }
       `}>
         <Icon className="w-4 h-4" />

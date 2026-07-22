@@ -186,6 +186,25 @@ export function AuditActivityCenter({ db, materials, currentUser, onSelectVendor
           }
         }
 
+        // Try parsing structured changes encoded inside the action text
+        if (actionText.includes('تغییرات: ')) {
+          changes = [];
+          const changesPart = actionText.split('تغییرات: ')[1];
+          if (changesPart) {
+            const changeItems = changesPart.split(' | ');
+            changeItems.forEach(item => {
+              const match = item.match(/\[(.*?)\]:\s*از\s*\[(.*?)\]\s*به\s*\[(.*?)\]/);
+              if (match) {
+                changes.push({
+                  field: match[1],
+                  before: match[2],
+                  after: match[3]
+                });
+              }
+            });
+          }
+        }
+
         return {
           id: log.id,
           rawDate: log.date,
@@ -206,7 +225,7 @@ export function AuditActivityCenter({ db, materials, currentUser, onSelectVendor
           ipAddress,
           browser,
           os,
-          changes
+          changes: log.changes || changes
         };
       });
     });

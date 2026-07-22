@@ -1,5 +1,33 @@
 # System Changelog
 
+## [2026-07-22] - Enterprise Architecture & Code Quality Review Audit
+### Changed
+- **Repository Optimization**: Performed a comprehensive 12-point Enterprise Architecture & Code Quality Audit across Frontend, Backend (`server.ts`), Database models, API routes, and styling.
+- **Dead File Cleanup**: Removed 28 obsolete temporary `.cjs` and `.sh` patch scripts from root workspace, reducing repository bloat while preserving 100% of functional logic, database schemas, and API end-points.
+- **Authentication Fix**: Restored default user credentials in `/database/users.json` for `admin` (`123456`) and department accounts (`123`).
+
+## [2026-07-22] - Unified Enterprise Light Theme Integration
+### Changed
+- **Unified Light Theme Login (`LoginView.tsx`)**: Upgraded the login screen from its dark glassmorphic layout to a highly professional, elegant modern Light Theme. Uses clean slate/white containers, high-contrast typography, premium brand integration, crisp input fields with soft focus rings, and fully accessible styles.
+- **Light Theme Supplier Risk Assessment (`VendorDetail.tsx`)**: Completely redesigned the Supplier Risk Assessment (FMEA) form from its previous `bg-slate-900` dark container style into a cohesive, beautiful, mathematically precise light card interface. Incorporates warm slate and amber accents, clear dropdown options, highly scannable info/formula cards, and accessible success feedback layouts.
+- **Enterprise UI/UX Redesign (Strict Presentation Layer)**: Re-engineered login view with clean layout, active border highlights, user role status pill, and responsive elements while maintaining 100% of underlying application logic, data schemas, API routes, and Excel exports.
+
+## [2026-07-21] - Detailed Change Log Value Comparison & Structured Diff (Before/After) - Phase 2
+### Added
+- Extended the visual Before/After diffing engine to cover **Laboratory Results**, **Risk Assessments (FMEA)**, and **Multi-Department Scoring / Final Evaluation**.
+- Designed dynamic state-aware comparisons during action submission:
+  - **Laboratory Results**: Compares QC Code, Test Date, Quality Decision (Pass/Reject/Conditional), and Deviation Reason (None/NCR/Deviation/OOS/etc.). Also tracks deleted records with a "Physical Delete" state.
+  - **Risk Assessment (FMEA)**: Fully tracks change deltas for Material Criticality, Probability, Detectability, final RPN Score, and Supplier Risk Index (SRI) against previous ratings.
+  - **Final Evaluation**: Computes the exact change in scores across QA, Commercial, Planning, and Finance departments, as well as final quality grade and status updates.
+- Fully integrated with the high-contrast split visual cards in the **Audit & Activity Center** event drawer.
+
+## [2026-07-21] - Detailed Change Log Value Comparison & Structured Diff (Before/After)
+### Added
+- Implemented deep change comparison inside `VendorForm.tsx` to log exactly what fields were edited (e.g. Supplier Name, Chemical Name, CAS, IRC, Contact Info, status, or grade).
+- Appended structured change data `changes` directly to the `ActivityLog` object and schema (`src/types.ts`).
+- Created a regex-based parser inside the **Audit & Activity Center** (`AuditActivityCenter.tsx`) to retroactively reconstruct change histories from encoded string patterns.
+- Enabled a visual diffing UI in the event drawer, allowing QA auditors to compare previous (Before) vs new (After) values clearly.
+
 ## [2026-07-21] - Multi-Product Material Mapping duplicate validation
 ### Changed
 - Re-architected duplicate substance checking in `MaterialForm.tsx`.

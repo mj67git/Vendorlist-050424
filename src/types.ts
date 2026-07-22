@@ -32,6 +32,7 @@ export interface ActivityLog {
   action: string;
   date: string;
   user: string;
+  changes?: { field: string; before: string; after: string }[];
 }
 
 export interface RiskAssessmentData {

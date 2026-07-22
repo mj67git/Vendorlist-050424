@@ -14,6 +14,18 @@
 - **Complexity**: High
 - **Acceptance Criteria**: Develop a fully searchable log view with dynamic pagination, filterable categories (creation, editing, lab test logs), and visually distinctive action tags.
 
+### [TASK-303] Enterprise UI/UX Redesign (Completed)
+- **Priority**: High
+- **Status**: Done
+- **Complexity**: High
+- **Acceptance Criteria**: Redesign visual layout inspired by Linear, Vercel, Notion, Supabase, and Apple HIG across authentication, app frame, sidebar, topbar header, KPI widgets, and utility stylesheets while strictly enforcing Category B zero-logic modification rules.
+
+### [TASK-304] Unified Light Theme Integration (Completed)
+- **Priority**: High
+- **Status**: Done
+- **Complexity**: Medium
+- **Acceptance Criteria**: Transition user login gateway (`LoginView.tsx`) and Supplier Risk Assessment (FMEA) form (`VendorDetail.tsx`) to modern Light Themes. Keep styles consistent with the off-white, light gray, slate-accented presentation language of the overall app. Ensure complete color accessibility and functional integrity.
+
 ---
 
 ## 2. Product Backlog (Sprint 5 & Beyond)

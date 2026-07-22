@@ -92,11 +92,21 @@ export function VendorDetail({
     const updatedRecords = [...(vendor.analysisRecords || []), record];
     
     const decisionMapList = { Pass: 'قبول (Pass)', Reject: 'مردود (Reject)', 'Approved Conditional': 'قبول مشروط (Approved Conditional)' };
+    const devReasonMap = { None: 'بدون انحراف', NCR: 'گزارش عدم انطباق (NCR)', Deviation: 'انحراف کیفی', OOS: 'خارج از محدوده (OOS)', CAPA: 'اقدام اصلاحی/پیشگیرانه (CAPA)', OOT: 'روند غیرعادی (OOT)', Complaint: 'شکایت کیفی', Other: 'سایر موارد' };
+    
+    const changesList: { field: string; before: string; after: string }[] = [
+      { field: 'کد QC نتیجه آزمایش جدید', before: 'ثبت‌نشده/جدید', after: record.qcCode },
+      { field: 'تصمیم آزمایشگاهی جدید', before: 'ثبت‌نشده/جدید', after: decisionMapList[record.decision] || record.decision },
+      { field: 'انحراف آزمایشگاهی جدید', before: 'ثبت‌نشده/جدید', after: devReasonMap[record.deviationReason as keyof typeof devReasonMap] || record.deviationReason },
+      { field: 'توضیحات آزمایش جدید', before: 'ثبت‌نشده/جدید', after: record.comments || 'بدون توضیح' }
+    ];
+
     const newLog = {
       id: 'log_' + Math.random().toString(36).substring(2, 8),
       action: `ثبت نتیجه آزمایش جدید برای سورس "${vendor.material}" (${vendor.name}) - تصمیم: [${decisionMapList[record.decision] || record.decision}] (کد QC: ${record.qcCode})`,
       date: new Date().toLocaleString('fa-IR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute:'2-digit' }),
-      user: currentUser?.name || 'کاربر سیستم'
+      user: currentUser?.name || 'کاربر سیستم',
+      changes: changesList
     };
 
     onSave({
@@ -157,6 +167,29 @@ export function VendorDetail({
       return;
     }
 
+    const originalRecord = (vendor.analysisRecords || []).find(r => r.id === recordId);
+    const changesList: { field: string; before: string; after: string }[] = [];
+    const decisionMapList = { Pass: 'قبول (Pass)', Reject: 'مردود (Reject)', 'Approved Conditional': 'قبول مشروط (Approved Conditional)' };
+    const devReasonMap = { None: 'بدون انحراف', NCR: 'گزارش عدم انطباق (NCR)', Deviation: 'انحراف کیفی', OOS: 'خارج از محدوده (OOS)', CAPA: 'اقدام اصلاحی/پیشگیرانه (CAPA)', OOT: 'روند غیرعادی (OOT)', Complaint: 'شکایت کیفی', Other: 'سایر موارد' };
+
+    if (originalRecord && editingAnalysis) {
+      if (originalRecord.qcCode !== editingAnalysis.qcCode.trim()) {
+        changesList.push({ field: 'کد QC آزمایش', before: originalRecord.qcCode, after: editingAnalysis.qcCode.trim() });
+      }
+      if (originalRecord.date !== editingAnalysis.date) {
+        changesList.push({ field: 'تاریخ انجام آزمایش', before: originalRecord.date, after: editingAnalysis.date });
+      }
+      if (originalRecord.decision !== editingAnalysis.decision) {
+        changesList.push({ field: 'تصمیم آزمایشگاهی', before: decisionMapList[originalRecord.decision] || originalRecord.decision, after: decisionMapList[editingAnalysis.decision] || editingAnalysis.decision });
+      }
+      if (originalRecord.deviationReason !== editingAnalysis.deviationReason) {
+        changesList.push({ field: 'انحراف آزمایشگاهی (Deviation)', before: devReasonMap[originalRecord.deviationReason as keyof typeof devReasonMap] || originalRecord.deviationReason, after: devReasonMap[editingAnalysis.deviationReason as keyof typeof devReasonMap] || editingAnalysis.deviationReason });
+      }
+      if ((originalRecord.comments || '').trim() !== editingAnalysis.comments.trim()) {
+        changesList.push({ field: 'توضیحات آزمایش', before: originalRecord.comments || 'خالی', after: editingAnalysis.comments.trim() || 'خالی' });
+      }
+    }
+
     const updatedRecords = (vendor.analysisRecords || []).map(r => {
       if (r.id === recordId) {
         return {
@@ -172,12 +205,12 @@ export function VendorDetail({
       return r;
     });
 
-    const decisionMapList = { Pass: 'قبول (Pass)', Reject: 'مردود (Reject)', 'Approved Conditional': 'قبول مشروط (Approved Conditional)' };
     const newLog = {
       id: 'log_' + Math.random().toString(36).substring(2, 8),
       action: `ویرایش نتیجه آزمایش برای سورس "${vendor.material}" (${vendor.name}) - تصمیم جدید: [${decisionMapList[editingAnalysis.decision] || editingAnalysis.decision}] (کد QC: ${editingAnalysis.qcCode})`,
       date: new Date().toLocaleString('fa-IR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute:'2-digit' }),
-      user: currentUser?.name || 'کاربر سیستم'
+      user: currentUser?.name || 'کاربر سیستم',
+      changes: changesList.length > 0 ? changesList : undefined
     };
 
     onSave({
@@ -193,11 +226,20 @@ export function VendorDetail({
   const handleDeleteAnalysis = (recordId: string) => {
     const updatedRecords = (vendor.analysisRecords || []).filter(r => r.id !== recordId);
     const deletedRecord = (vendor.analysisRecords || []).find(r => r.id === recordId);
+    
+    const decisionMapList = { Pass: 'قبول (Pass)', Reject: 'مردود (Reject)', 'Approved Conditional': 'قبول مشروط (Approved Conditional)' };
+    const deleteChanges: { field: string; before: string; after: string }[] = [];
+    if (deletedRecord) {
+      deleteChanges.push({ field: 'کد QC حذف شده', before: deletedRecord.qcCode, after: 'حذف فیزیکی' });
+      deleteChanges.push({ field: 'تصمیم آزمایشگاه حذف شده', before: decisionMapList[deletedRecord.decision] || deletedRecord.decision, after: 'حذف فیزیکی' });
+    }
+
     const newLog = {
       id: 'log_' + Math.random().toString(36).substring(2, 8),
       action: `حذف نتیجه آزمایش برای سورس "${vendor.material}" (${vendor.name}) ${deletedRecord ? `(کد QC: ${deletedRecord.qcCode})` : ''}`,
       date: new Date().toLocaleString('fa-IR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute:'2-digit' }),
-      user: currentUser?.name || 'کاربر سیستم'
+      user: currentUser?.name || 'کاربر سیستم',
+      changes: deleteChanges.length > 0 ? deleteChanges : undefined
     };
 
     onSave({
@@ -1205,11 +1247,87 @@ export function RiskAssessmentForm({ vendor, onSave, onClose, currentUser }: { v
       evaluator: currentUser?.name || 'کاربر سیستم'
     };
 
+    const prevAssessment = vendor.riskAssessment;
+    const riskChanges: { field: string; before: string; after: string }[] = [];
+    const levelMap = { High: 'بالا (High)', Medium: 'متوسط (Medium)', Low: 'پایین (Low)' };
+    const criticalityMap: Record<number, string> = {
+      5: 'ماده موثره (امتیاز ۵)',
+      4: 'اکسپیانت (امتیاز ۴)',
+      3: 'حدواسط شیمیایی، حلال ها و واکنشگرها (امتیاز ۳)',
+      2: 'اقلام بسته بندی اولیه (امتیاز ۲)',
+      1: 'اقلام بسته بندی ثانویه (امتیاز ۱)'
+    };
+    const probabilityMap: Record<number, string> = {
+      1: 'عدم خرابی (امتیاز ۱)',
+      2: 'احتمال کم (امتیاز ۲)',
+      3: 'احتمال متوسط (امتیاز ۳)',
+      4: 'احتمال زیاد (امتیاز ۴)',
+      5: 'به شدت محتمل (امتیاز ۵)'
+    };
+    const detectabilityMap: Record<number, string> = {
+      1: 'تمام مشکلات قابل تشخیص (امتیاز ۱)',
+      2: 'اکثر مشکلات قابل تشخیص (امتیاز ۲)',
+      3: 'بخشی قابل تشخیص (امتیاز ۳)',
+      4: 'تشخیص دشوار (امتیاز ۴)',
+      5: 'تقریبا غیر قابل تشخیص (امتیاز ۵)'
+    };
+
+    if (prevAssessment) {
+      if (prevAssessment.riskLevel !== riskLevel) {
+        riskChanges.push({
+          field: 'سطح ریسک کیفی',
+          before: levelMap[prevAssessment.riskLevel as keyof typeof levelMap] || prevAssessment.riskLevel || 'نامشخص',
+          after: levelMap[riskLevel as keyof typeof levelMap] || riskLevel
+        });
+      }
+      if (prevAssessment.riskScore !== riskScore) {
+        riskChanges.push({
+          field: 'امتیاز نهایی ریسک (RPN)',
+          before: String(prevAssessment.riskScore || 0),
+          after: String(riskScore)
+        });
+      }
+      if (prevAssessment.sri !== sri) {
+        riskChanges.push({
+          field: 'شاخص ریسک سورس (SRI)',
+          before: String(prevAssessment.sri || 0),
+          after: String(sri)
+        });
+      }
+      if (prevAssessment.materialCriticality !== criticality) {
+        riskChanges.push({
+          field: 'بحرانیت ماده اولیه',
+          before: criticalityMap[prevAssessment.materialCriticality] || String(prevAssessment.materialCriticality),
+          after: criticalityMap[criticality] || String(criticality)
+        });
+      }
+      if (prevAssessment.probability !== probability) {
+        riskChanges.push({
+          field: 'احتمال خرابی (FMEA)',
+          before: probabilityMap[prevAssessment.probability] || String(prevAssessment.probability),
+          after: probabilityMap[probability] || String(probability)
+        });
+      }
+      if (prevAssessment.detectability !== detectability) {
+        riskChanges.push({
+          field: 'قابلیت تشخیص خطا',
+          before: detectabilityMap[prevAssessment.detectability] || String(prevAssessment.detectability),
+          after: detectabilityMap[detectability] || String(detectability)
+        });
+      }
+    } else {
+      riskChanges.push({ field: 'سطح ریسک کیفی جدید', before: 'ارزیابی‌نشده', after: levelMap[riskLevel as keyof typeof levelMap] || riskLevel });
+      riskChanges.push({ field: 'امتیاز نهایی ریسک جدید (RPN)', before: '۰', after: String(riskScore) });
+      riskChanges.push({ field: 'شاخص ریسک جدید (SRI)', before: 'ثبت‌نشده', after: String(sri) });
+      riskChanges.push({ field: 'بحرانیت ماده اولیه', before: 'نامشخص', after: criticalityMap[criticality] || String(criticality) });
+    }
+
     const newLog = {
       id: 'log_' + Math.random().toString(36).substring(2, 8),
       action: `ثبت ارزیابی ریسک برای "${vendor.material}" (${vendor.name}) - سطح ریسک: ${riskLevel === 'High' ? 'بالا (High)' : riskLevel === 'Medium' ? 'متوسط (Medium)' : riskLevel === 'Low' ? 'پایین (Low)' : 'نامشخص'}، امتیاز نهایی: ${riskScore}، شاخص SRI: ${sri || 'N/A'}`,
       date: new Date().toLocaleString('fa-IR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute:'2-digit' }),
-      user: currentUser?.name || 'کاربر سیستم'
+      user: currentUser?.name || 'کاربر سیستم',
+      changes: riskChanges.length > 0 ? riskChanges : undefined
     };
 
     onSave({
@@ -1226,24 +1344,24 @@ export function RiskAssessmentForm({ vendor, onSave, onClose, currentUser }: { v
 
   if (isSuccess) {
     return (
-      <div className="bg-slate-900 border border-emerald-500/30 rounded-2xl p-16 text-center flex flex-col items-center justify-center mb-8 shadow-[0_0_20px_rgba(16,185,129,0.1)] fade-in" dir="rtl">
-        <div className="bg-emerald-500/10 p-4 rounded-full border border-emerald-500/20 mb-6">
-          <CheckCircle className="w-16 h-16 text-emerald-400 bounce-in" />
+      <div className="bg-emerald-50/50 border border-emerald-200/60 rounded-2xl p-16 text-center flex flex-col items-center justify-center mb-8 shadow-sm fade-in" dir="rtl">
+        <div className="bg-emerald-100/60 p-4 rounded-full border border-emerald-200 mb-6">
+          <CheckCircle className="w-16 h-16 text-emerald-600 bounce-in" />
         </div>
-        <h3 className="text-2xl font-bold text-white mb-2">ارزیابی ریسک با موفقیت ثبت شد</h3>
-        <p className="text-slate-400 font-medium">نتایج ارزیابی ریسک و محاسبات شاخص SRI با موفقیت ثبت گردید. در حال بازگشت...</p>
+        <h3 className="text-2xl font-bold text-slate-800 mb-2">ارزیابی ریسک با موفقیت ثبت شد</h3>
+        <p className="text-slate-500 font-medium">نتایج ارزیابی ریسک و محاسبات شاخص SRI با موفقیت ثبت گردید. در حال بازگشت...</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 mb-8 shadow-[0_0_20px_rgba(245,158,11,0.1)] fade-in">
-      <div className="flex items-center justify-between mb-6 border-b border-slate-800 pb-4">
-        <h3 className="text-xl font-bold text-amber-500 flex items-center gap-2">
-          <ShieldAlert className="w-6 h-6" />
+    <div className="bg-white border border-slate-200/80 rounded-2xl p-6 mb-8 shadow-xs fade-in">
+      <div className="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
+        <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+          <ShieldAlert className="w-6 h-6 text-amber-500" />
           ارزیابی ریسک تامین کنندگان (Supplier Risk Assessment)
         </h3>
-        <button onClick={onClose} className="p-2 hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-white">
+        <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-lg transition-colors text-slate-400 hover:text-slate-600">
           <X className="w-5 h-5" />
         </button>
       </div>
@@ -1251,9 +1369,9 @@ export function RiskAssessmentForm({ vendor, onSave, onClose, currentUser }: { v
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Material Criticality */}
-          <div className="space-y-3 p-4 bg-slate-800/40 rounded-xl border border-slate-700/50">
-            <label className="block text-sm font-medium text-slate-300">۱. اهمیت ماده (Material Criticality)</label>
-            <select value={criticality} onChange={e => setCriticality(Number(e.target.value))} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-amber-500">
+          <div className="space-y-3 p-4 bg-slate-50/50 rounded-xl border border-slate-200/60">
+            <label className="block text-sm font-bold text-slate-700">۱. اهمیت ماده (Material Criticality)</label>
+            <select value={criticality} onChange={e => setCriticality(Number(e.target.value))} className="w-full bg-white border border-slate-200 rounded-lg px-4 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/10 focus:border-amber-500 text-sm">
               <option value={5}>ماده موثره - امتیاز ۵</option>
               <option value={4}>اکسپیانت - امتیاز ۴</option>
               <option value={3}>حدواسط شیمیایی، حلال ها و واکنشگرها - امتیاز ۳</option>
@@ -1263,12 +1381,12 @@ export function RiskAssessmentForm({ vendor, onSave, onClose, currentUser }: { v
           </div>
 
           {/* Probability of Failure */}
-          <div className="space-y-3 p-4 bg-slate-800/40 rounded-xl border border-slate-700/50">
-            <label className="block text-sm font-medium text-slate-300">۲. احتمال خرابی (Probability of failure)</label>
-            <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
-              <span>SPS فعلی: <strong className="text-amber-400 text-sm">{spsScore > 0 ? spsScore : 'تعیین نشده'}</strong></span>
+          <div className="space-y-3 p-4 bg-slate-50/50 rounded-xl border border-slate-200/60">
+            <label className="block text-sm font-bold text-slate-700">۲. احتمال خرابی (Probability of failure)</label>
+            <div className="flex items-center justify-between text-xs text-slate-500 mb-2">
+              <span>SPS فعلی: <strong className="text-amber-600 text-sm">{spsScore > 0 ? spsScore : 'تعیین نشده'}</strong></span>
             </div>
-            <select value={probability} onChange={e => setProbability(Number(e.target.value))} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-amber-500">
+            <select value={probability} onChange={e => setProbability(Number(e.target.value))} className="w-full bg-white border border-slate-200 rounded-lg px-4 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/10 focus:border-amber-500 text-sm">
               <option value={1}>عدم خرابی (SPS: 80-100) - امتیاز ۱</option>
               <option value={2}>احتمال کم (SPS: 60-79) - امتیاز ۲</option>
               <option value={3}>احتمال متوسط (SPS: 40-59) - امتیاز ۳</option>
@@ -1278,9 +1396,9 @@ export function RiskAssessmentForm({ vendor, onSave, onClose, currentUser }: { v
           </div>
 
           {/* Detectability */}
-          <div className="space-y-3 p-4 bg-slate-800/40 rounded-xl border border-slate-700/50 md:col-span-2">
-            <label className="block text-sm font-medium text-slate-300">۳. تشخیص (Detectability)</label>
-            <select value={detectability} onChange={e => setDetectability(Number(e.target.value))} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-amber-500">
+          <div className="space-y-3 p-4 bg-slate-50/50 rounded-xl border border-slate-200/60 md:col-span-2">
+            <label className="block text-sm font-bold text-slate-700">۳. تشخیص (Detectability)</label>
+            <select value={detectability} onChange={e => setDetectability(Number(e.target.value))} className="w-full bg-white border border-slate-200 rounded-lg px-4 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/10 focus:border-amber-500 text-sm">
               <option value={1}>تمام مشکلات توسط QC قابل تشخیص - امتیاز ۱</option>
               <option value={2}>اکثر مشکلات قابل تشخیص - امتیاز ۲</option>
               <option value={3}>بخشی قابل تشخیص - امتیاز ۳</option>
@@ -1291,42 +1409,42 @@ export function RiskAssessmentForm({ vendor, onSave, onClose, currentUser }: { v
         </div>
 
         {/* Info / Formulas */}
-        <div className="bg-slate-800/40 border border-slate-700/50 rounded-xl p-4 text-sm text-slate-300">
-          <div className="font-bold text-slate-200 mb-2 border-b border-slate-700/50 pb-2">نحوه محاسبه شاخص‌ها:</div>
+        <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-4 text-sm text-slate-600">
+          <div className="font-bold text-slate-800 mb-2 border-b border-slate-200/60 pb-2">نحوه محاسبه شاخص‌ها:</div>
           <div className="space-y-2 font-mono text-xs md:text-sm" dir="ltr">
             <div className="flex gap-2">
-               <span className="text-amber-400 font-bold shrink-0">RPN (Risk Score) =</span>
-               <span className="text-slate-400 break-all">Material Criticality × Probability of failure × Detectability</span>
+               <span className="text-amber-700 font-bold shrink-0">RPN (Risk Score) =</span>
+               <span className="text-slate-500 break-all">Material Criticality × Probability of failure × Detectability</span>
             </div>
             <div className="flex gap-2">
-               <span className="text-amber-400 font-bold shrink-0">SRI (Supplier Risk Index) =</span>
-               <span className="text-slate-400 break-all">(0.6 × RPN) + (0.4 × (100 - SPS Score))</span>
+               <span className="text-amber-700 font-bold shrink-0">SRI (Supplier Risk Index) =</span>
+               <span className="text-slate-500 break-all">(0.6 × RPN) + (0.4 × (100 - SPS Score))</span>
             </div>
           </div>
         </div>
 
         {/* Results */}
-        <div className="bg-slate-900 p-5 rounded-xl border border-amber-500/20 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="bg-amber-50/30 p-5 rounded-xl border border-amber-200/50 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-6">
             <div className="text-center">
-              <div className="text-xs text-slate-400 mb-1">Risk Score</div>
-              <div className="text-xl font-bold tabular-nums text-white">{riskScore}</div>
+              <div className="text-xs text-slate-500 mb-1">Risk Score</div>
+              <div className="text-xl font-bold tabular-nums text-slate-800">{riskScore}</div>
             </div>
-            <div className="h-8 w-px bg-slate-700"></div>
+            <div className="h-8 w-px bg-slate-200"></div>
             <div className="text-center">
-              <div className="text-xs text-slate-400 mb-1">Supplier Risk Index (SRI)</div>
-              <div className="text-xl font-bold tabular-nums text-white">{sri.toFixed(1)}</div>
+              <div className="text-xs text-slate-500 mb-1">Supplier Risk Index (SRI)</div>
+              <div className="text-xl font-bold tabular-nums text-slate-800">{sri.toFixed(1)}</div>
             </div>
           </div>
           
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <div className="text-xs text-slate-400 mb-1">سطح ریسک (Risk Level)</div>
-              <div className={`text-xl font-bold ${riskLevel === 'Low' ? 'text-emerald-400' : riskLevel === 'Medium' ? 'text-amber-400' : 'text-red-500'}`}>
+              <div className="text-xs text-slate-500 mb-1">سطح ریسک (Risk Level)</div>
+              <div className={`text-xl font-bold ${riskLevel === 'Low' ? 'text-emerald-600' : riskLevel === 'Medium' ? 'text-amber-600' : 'text-rose-600'}`}>
                 {riskLevel === 'Low' ? 'پایین (Low)' : riskLevel === 'Medium' ? 'متوسط (Medium)' : 'بالا (High)'}
               </div>
             </div>
-            <button type="submit" className="bg-amber-600 hover:bg-amber-500 text-white font-medium px-6 py-2.5 rounded-lg transition-colors shadow-[0_0_15px_rgba(245,158,11,0.3)]">
+            <button type="submit" className="bg-amber-600 hover:bg-amber-500 active:bg-amber-700 text-white font-bold px-6 py-2.5 rounded-lg transition-colors shadow-sm cursor-pointer">
               ثبت نتیجه ارزیابی ریسک
             </button>
           </div>
@@ -1554,11 +1672,48 @@ export function EvaluationForm({ vendor, onSave, onClose, currentUser }: { vendo
       }
 
       const statusMapList = { approved: 'تایید شده', conditional: 'تایید مشروط', rejected: 'مردود', new: 'جدید' };
+      
+      const evalChangesList: { field: string; before: string; after: string }[] = [];
+      if (vendor.grade !== grade) {
+        evalChangesList.push({
+          field: 'رتبه‌بندی کیفی (Grade)',
+          before: vendor.grade ? `Grade ${vendor.grade}` : 'ثبت‌نشده',
+          after: grade ? `Grade ${grade}` : 'نامشخص'
+        });
+      }
+      if (vendor.status !== pStatus) {
+        evalChangesList.push({
+          field: 'وضعیت ارزیابی سورس',
+          before: statusMapList[vendor.status as keyof typeof statusMapList] || vendor.status || 'ثبت‌نشده',
+          after: statusMapList[pStatus as keyof typeof statusMapList] || pStatus
+        });
+      }
+
+      const depts = [
+        { key: 'qa', label: 'امتیاز واحد آزمایشگاه (QA)' },
+        { key: 'commercial', label: 'امتیاز واحد بازرگانی' },
+        { key: 'planning', label: 'امتیاز واحد برنامه‌ریزی' },
+        { key: 'finance', label: 'امتیاز واحد مالی' }
+      ];
+
+      depts.forEach(d => {
+        const prevScore = vendor.scores?.[d.key as 'qa'|'commercial'|'planning'|'finance'] || 0;
+        const newScore = finalScores[d.key as 'qa'|'commercial'|'planning'|'finance'] || 0;
+        if (prevScore !== newScore) {
+          evalChangesList.push({
+            field: d.label,
+            before: `${prevScore} امتیاز`,
+            after: `${newScore} امتیاز`
+          });
+        }
+      });
+
       const newLog = {
         id: 'log_' + Math.random().toString(36).substring(2, 8),
         action: `ثبت ارزیابی نهایی سورس "${vendor.material}" (${vendor.name}) - گرید نهایی: [Grade ${grade}]، وضعیت جدید: [${statusMapList[pStatus] || pStatus}] (امتیازات: آزمایشگاهی: ${finalScores.qa || 0}، بازرگانی: ${finalScores.commercial || 0}، برنامه‌ریزی: ${finalScores.planning || 0}، مالی: ${finalScores.finance || 0})`,
         date: new Date().toLocaleString('fa-IR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute:'2-digit' }),
-        user: currentUser?.name || 'کاربر سیستم'
+        user: currentUser?.name || 'کاربر سیستم',
+        changes: evalChangesList.length > 0 ? evalChangesList : undefined
       };
 
       onSave({

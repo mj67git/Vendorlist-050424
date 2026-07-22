@@ -178,18 +178,57 @@ export function VendorForm({
       ? `ویرایش اطلاعات سورس "${formData.material}" (${formData.name})`
       : `ثبت سورس جدید "${formData.material}" (${formData.name}) در دسته ${categoryLabels[finalCategory as keyof typeof categoryLabels]?.fa || finalCategory}`;
     
-    if (hasStatusChanged) {
-      actionDetail += ` | تغییر وضعیت از [${statusTextMap[existingVendor.status] || existingVendor.status}] به [${statusTextMap[finalStatus] || finalStatus}]`;
+    const changesList: { field: string; before: string; after: string }[] = [];
+    if (existingVendor) {
+      if (existingVendor.name !== formData.name) {
+        changesList.push({ field: 'نام تامین‌کننده', before: existingVendor.name || 'خالی', after: formData.name || 'خالی' });
+      }
+      if (existingVendor.nameEn !== (sourceType === 'domestic' ? '' : formData.nameEn)) {
+        changesList.push({ field: 'نام انگلیسی تامین‌کننده', before: existingVendor.nameEn || 'خالی', after: (sourceType === 'domestic' ? '' : formData.nameEn) || 'خالی' });
+      }
+      if (existingVendor.material !== formData.material) {
+        changesList.push({ field: 'نام ماده اولیه (فارسی)', before: existingVendor.material || 'خالی', after: formData.material || 'خالی' });
+      }
+      if (existingVendor.materialEn !== formData.materialEn) {
+        changesList.push({ field: 'نام انگلیسی ماده اولیه', before: existingVendor.materialEn || 'خالی', after: formData.materialEn || 'خالی' });
+      }
+      if (existingVendor.cas !== formData.cas) {
+        changesList.push({ field: 'شماره CAS', before: existingVendor.cas || 'خالی', after: formData.cas || 'خالی' });
+      }
+      if (existingVendor.irc !== formData.irc) {
+        changesList.push({ field: 'کد IRC', before: existingVendor.irc || 'خالی', after: formData.irc || 'خالی' });
+      }
+      if (existingVendor.ircReceivedDate !== formData.ircReceivedDate) {
+        changesList.push({ field: 'تاریخ اخذ IRC', before: existingVendor.ircReceivedDate || 'خالی', after: formData.ircReceivedDate || 'خالی' });
+      }
+      if (existingVendor.ircExpiryDate !== formData.ircExpiryDate) {
+        changesList.push({ field: 'تاریخ انقضا IRC', before: existingVendor.ircExpiryDate || 'خالی', after: formData.ircExpiryDate || 'خالی' });
+      }
+      if (existingVendor.lastAudit !== formData.lastAudit) {
+        changesList.push({ field: 'آخرین تاریخ ارزیابی', before: existingVendor.lastAudit || 'خالی', after: formData.lastAudit || 'خالی' });
+      }
+      if (existingVendor.contactInfo !== formData.contactInfo) {
+        changesList.push({ field: 'اطلاعات تماس', before: existingVendor.contactInfo || 'خالی', after: formData.contactInfo || 'خالی' });
+      }
+      if (hasStatusChanged) {
+        changesList.push({ field: 'وضعیت ارزیابی سورس', before: statusTextMap[existingVendor.status] || existingVendor.status, after: statusTextMap[finalStatus] || finalStatus });
+      }
+      if (hasGradeChanged) {
+        changesList.push({ field: 'رتبه‌بندی کیفی (Grade)', before: existingVendor.grade ? `Grade ${existingVendor.grade}` : 'نامشخص', after: finalGrade ? `Grade ${finalGrade}` : 'نامشخص' });
+      }
     }
-    if (hasGradeChanged) {
-      actionDetail += ` | تغییر درجه کیفی از [Grade ${existingVendor.grade || 'نامشخص'}] به [Grade ${finalGrade || 'نامشخص'}]`;
+
+    if (changesList.length > 0) {
+      const formattedChanges = changesList.map(ch => `[${ch.field}]: از [${ch.before}] به [${ch.after}]`).join(' | ');
+      actionDetail += ` | تغییرات: ${formattedChanges}`;
     }
 
     const newLog = {
       id: 'log_' + Math.random().toString(36).substring(2, 8),
       action: actionDetail,
       date: new Date().toLocaleString('fa-IR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute:'2-digit' }),
-      user: currentUser?.name || 'کاربر سیستم'
+      user: currentUser?.name || 'کاربر سیستم',
+      changes: changesList.length > 0 ? changesList : undefined
     };
 
     const finalCas = formData.cas;
