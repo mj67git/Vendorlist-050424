@@ -15,6 +15,12 @@ export function LoginView({ onLogin }: LoginViewProps) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const fillCredentials = (usr: string, pass: string) => {
+    setUsername(usr);
+    setPassword(pass);
+    setError('');
+  };
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (!username || !password) {
@@ -146,7 +152,49 @@ export function LoginView({ onLogin }: LoginViewProps) {
             </button>
          </form>
 
-         <div className="mt-8 pt-6 border-t border-slate-100 text-center">
+         {/* Quick Fill Credentials Helper */}
+         <div className="mt-6 pt-5 border-t border-slate-100">
+           <p className="text-[11px] font-bold text-slate-500 mb-2.5 text-center uppercase tracking-wider">Demo Accounts (Click to fill)</p>
+           <div className="flex flex-wrap gap-1.5 justify-center">
+             <button 
+               type="button" 
+               onClick={() => fillCredentials('admin', '123456')}
+               className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-mono font-medium transition-colors cursor-pointer"
+             >
+               admin / 123456
+             </button>
+             <button 
+               type="button" 
+               onClick={() => fillCredentials('qa', '123')}
+               className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-mono font-medium transition-colors cursor-pointer"
+             >
+               qa / 123
+             </button>
+             <button 
+               type="button" 
+               onClick={() => fillCredentials('commercial', '123')}
+               className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-mono font-medium transition-colors cursor-pointer"
+             >
+               commercial / 123
+             </button>
+             <button 
+               type="button" 
+               onClick={() => fillCredentials('planning', '123')}
+               className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-mono font-medium transition-colors cursor-pointer"
+             >
+               planning / 123
+             </button>
+             <button 
+               type="button" 
+               onClick={() => fillCredentials('finance', '123')}
+               className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-mono font-medium transition-colors cursor-pointer"
+             >
+               finance / 123
+             </button>
+           </div>
+         </div>
+
+         <div className="mt-6 text-center">
             <p className="text-[11px] text-slate-400 font-mono">Secured Enterprise System • Role-Based Control</p>
          </div>
       </div>

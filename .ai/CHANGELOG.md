@@ -3,7 +3,7 @@
 ## [2026-07-22] - Enterprise Architecture & Code Quality Review Audit
 ### Changed
 - **Repository Optimization**: Performed a comprehensive 12-point Enterprise Architecture & Code Quality Audit across Frontend, Backend (`server.ts`), Database models, API routes, and styling.
-- **Dead File Cleanup**: Removed 28 obsolete temporary `.cjs` and `.sh` patch scripts from root workspace, reducing repository bloat while preserving 100% of functional logic, database schemas, and API end-points.
+- **Dead File Cleanup**: Removed 28 obsolete temporary `.cjs` and `.sh` patch scripts and purged legacy `/tmp` database dump files (`vendors_db_dump.json`, `vendors_db_dump.sql`), reducing repository bloat while preserving 100% of functional logic, database schemas, and API end-points.
 - **Authentication Fix**: Restored default user credentials in `/database/users.json` for `admin` (`123456`) and department accounts (`123`).
 
 ## [2026-07-22] - Unified Enterprise Light Theme Integration
